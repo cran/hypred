@@ -1,0 +1,8 @@
+exportPattern("^[^\\.]")
+import(stats, utils, methods)
+exportClasses(hypredGenome)
+exportMethods(show, summary, hypredCode,
+              hypredFounder, hypredRecombine,
+              hypredSNPdist, hypredTruePerformance,
+              hypredTpGenomeSpecific, hypredNewMap, hypredNewQTL)
+useDynLib(hypred, meiosisFUNallChr, hypredCode_FUN_dom)

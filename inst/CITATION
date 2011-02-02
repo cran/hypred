@@ -1,0 +1,13 @@
+citHeader("To cite package hypred in publications use:")
+desc <- packageDescription("hypred")
+year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", desc$Date)
+vers <- paste("R package version", desc$Version)
+citEntry(entry="Manual",
+title = "hypred: Simulation of Genomic Data in Applied Genetics",
+author = personList(as.person("Frank Technow ")),
+year = year,
+note = vers,
+textVersion =
+paste("Frank Technow", "(", year,
+"). hypred: Simulation of Genomic Data in Applied Genetics. ",
+vers, ".", sep=""))

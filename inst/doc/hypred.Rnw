@@ -1,0 +1,723 @@
+\documentclass{article}
+\usepackage[dvipsnames,usenames]{color}
+\definecolor{darkgreen}{rgb}{0,.6,.2} 
+\usepackage{amsmath}
+% \VignetteIndexEntry{hypred: Simulation of Genomic Data in Applied Genetics}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage{varioref}
+\onehalfspacing
+\usepackage{url}
+\usepackage{Sweave}
+\SweaveOpts{keep.source=TRUE} 
+% Sweave("<file name>", driver = weaver())
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{hyperref}
+\usepackage{ifthen}
+\usepackage{keyval}
+\hypersetup{pdfborder={0 0 0 0}, linkcolor ={blue}, colorlinks =
+  {true}, citecolor = {darkgreen}, urlcolor = {VioletRed}}
+
+\begin{document}
+\title{R Package hypred: Simulation of Genomic Data in Applied Genetics}
+\author{Frank Technow\footnote{University of Hohenheim, Institute of
+    Plant Breeding, Seed Science and Population Genetics, Stuttgart, Germany}}
+\date{package version 0.1}
+\maketitle 
+
+\section{Introduction}
+
+The package \textbf{hypred} (the name stands for \textbf{hy}brid
+\textbf{pred}iction) is intended for simulating high density genomic
+data. Its focus is on genomic applications in applied genetics, namely
+genomic prediction and selection \cite{meuwissen} in hybrid maize
+breeding , but it should be useful in related fields as well.
+
+The function \texttt{hypredGenome} is used to define the genome
+parameters: number and length of chromosomes, and number of SNP loci. It
+also simulates a genetic map. This functions returns an object that is
+of class \texttt{hypredGenome}. The function \texttt{hypredNewMap} is used
+to modify the genetic map, and the function \texttt{hypredNewQTL} to
+assign QTL. The function \texttt{hypredFounder} will create two homozygous
+founder lines according to the object returned by \texttt{hypredGenome}. The
+meiosis is simulated by the function \texttt{hypredRecombine}. This
+function takes two haploid chromosome sets (as found in a sex cell) and
+returns a recombined haploid chromosome set (i.e. the gamete). The
+meiosis is simulated according to the count-location model, simulation
+of mutations is possible as well. The functions
+\texttt{hypredTruePerformance} and \texttt{hypredTpGenomeSpecific} return
+the true genotypic values of individuals given their
+genotypes. \texttt{hypredTruePerformance} uses the QTL effects found in
+the \texttt{hypredGenome} object, \texttt{hypredTpGenomeSpecific} allows to specify
+new and genome specific effects. Various types of design matrices (to be
+used in modeling algorithms) are created from the genotypes by the
+function \texttt{hypredCode}. All functions mentioned above are generic,
+with methods defined for the \texttt{hypredGenome} object.\enlargethispage{2ex}
+
+\section{Basic concepts, possibilities and limitations}
+\label{sec:basic-conc-poss}
+\subsection{Genome}
+
+\begin{description}
+\item[Chromosomes] Only diploid genomes are supported. An arbitrary
+  number of chromosomes, with individual lengths, can be
+  simulated. All distances are genetic distances with unit Morgan
+  ($M$).
+\item[Marker loci] An arbitrary number of marker loci can be assigned
+  to the chromosomes (and with arbitrary I mean 1, 2, 3, \dots $\gg$
+  10,000). However, the number of marker loci needs to be equal for
+  each chromosome. The markers are treated as bi-allelic single
+  nucleotide polymorphisms (SNP) with alleles 1 and 0. The genetic map
+  of the markers can be generated randomly (via a uniform distribution
+  over the chromosome) or explicitly set by the user.
+\item[QTL] Quantitative trait loci (QTL) can be assigned to marker
+  loci. The QTL alleles are treated as identical apart from one
+  causative SNP (the one the QTL is assigned to). These causative SNP
+  can be unobserved (i.e. not included into the set of markers
+  available for analysis) or observed (i.e. perfect markers). The QTL
+  can have additive effects ($a$) or additive and dominance effects
+  ($d$). The effects are defined according to the Falconer scale
+  \cite{Falconer}, where $a$ is half the difference between the
+  homozygous genotypes (\textbf{0-0} and \textbf{1-1}) and $d$ is the
+  deviation of the heterozygous genotypes (\textbf{0-1} and
+  \textbf{1-0}) from the mean of the two homozygous
+  genotypes. Genotypic values are expressed as deviations from the
+  ``lower'' homozygot (\textbf{0-0}), so that the genotypic value of
+  the genotype (\textbf{1-1}) would be $2a$, for example. 
+  
+  The number of QTL with additive effect only, the number of QTL with
+  additive and dominance effect and the number of perfect markers,
+  must be the same for all chromosomes. If the number of QTL needs to
+  be different per chromosome, a workaround is to assign effects of $a
+  = d = 0$ to some of the QTLs.
+  
+  Only QTL for one trait can be considered at once. However, multiple
+  traits can be simulated by modifying the numbers, positions and
+  effects of QTL.
+\pagebreak
+\item[Meiosis] The meiosis is simulated according to the
+  count-location model that assumes no interference and agrees with
+  the Haldane mapping function.\cite{wu}\footnote{This fact was used
+    to validate the algorithm because observed recombination
+    frequencies could be compared with expected frequencies as
+    calculated by the inverse of the Haldane mapping function from the
+    map distances.} Here the number of crossing
+  over on a random meiotic product of a chromosome is Poisson
+  distributed with parameter $\lambda = L$ ($L$ being the length of
+  the chromosome in Morgan). The locations of the crossing over follow
+  a uniform distribution over the interval $(0,L)$.
+  
+\item[Mutations] The occurrence of mutations, $\mu$ denoting the
+  mutation rate, is simulated according to a simple count-location
+  model as well. The number of observed SNP mutations in the gamete
+  follows a Poisson distribution with parameter $\lambda = \mu$ times
+  the number of loci on a chromosome times the number of
+  chromosomes. Then each SNP-loci has an equal chance of being
+  mutated, irrespective on whether mutations occurred in its vicinity.
+  A mutation event always changes a \textbf{1} allele to a \textbf{0}
+  allele and vice versa (i.e. \textbf{0} to \textbf{1}; \textbf{1} to
+  \textbf{0}). During one meiosis, a given SNP-loci can only be
+  mutated twice if the number of mutations exceeds the total number of
+  SNP. This should rarely happen and is included only for
+  computational reasons. $\mu$ can be different for marker loci and
+  QTL.
+
+  Since all the simulated loci are treated as SNP, $\mu$ should be
+  interpreted as $\mu$ per \emph{base-pair} per meiosis.
+\end{description}
+
+\subsection{Working concepts}
+This section concerns mainly the central, workhorse function
+\texttt{hypredRecombine}, which simulates the recombination.
+\begin{description}
+\item[Low level approach] \texttt{hypredRecombine} is as low level as
+  it can get. It just takes two haploid chromosome sets (as can be
+  found in a sex cell) and returns a single gamete. To create
+  populations, loops have to be constructed in which the function is
+  called (examples follow). Hence, basic to intermediate proficiency
+  in R is required to perform more complex simulations. \emph{This is
+    a low level package on purpose.} The low level nature gives the
+  user full flexibility to do whatever he wants, and, I confess, not
+  including functions like ``\texttt{hypredCreateNCIII\_designBC}''
+  makes life easier for me.  
+  
+  \vspace{1ex} In a sense, the function
+  \texttt{hypredRecombine} follows some of the UNIX ``Software tools''
+  programming principles. Namely the ``do one thing well'' principle
+  and that the input and output data should be the same.  The idea is
+  that this function is used as a building block in larger programs
+  for simulating very complex populations.
+
+  
+\item[Sex cell - gamete approach] This is of course just the
+  consequence of the low level thing. As mentioned, function
+  \texttt{hypredRecombine} just takes two haploid chromosome sets (as
+  can be found in a sex cell) and returns a single gamete. So when
+  trying to create a population, one has to think and work in terms of
+  sex cells and gametes. This means that one also needs to have some
+  basic knowledge of population genetics, because one needs to know
+  how to get from a sex cell or single gamete to some complex
+  population.
+
+\item[low level data] A gamete, i.e. the in- and output of
+  \texttt{hypredRecombine} and most other functions, is simply an one
+  row integer matrix that represents the genotype as elements of 1 and
+  0 (corresponding to the \textbf{1} and \textbf{0} alleles). An
+  advantage of this is that the data is easily accessible, designing a
+  gamete with a special genotype, for example, just involves creating
+  a matrix accordingly. A disadvantage is that there is more
+  responsibility at the user side to assure that the data is
+  valid. However, the functions include many validity checks and using
+  only unmodified data produced by functions from the package should
+  guaranty validity. 
+  
+  The accessibility of the in- and output data and of the
+  \texttt{hypredGenome} object allows the users to quickly write their
+  own extractor and modifier functions respectively to adapt the ones
+  provided. Hence, intermediate to advanced users of R should find it
+  very simple to include some epistatic interactions into function
+  \texttt{hypredTruePerformance}, for example.
+
+\item[computing efficiency] The computations for simulating the
+  meiosis are performed by a C routine that is called through
+  \texttt{hypredRecombine}. Still, having to extensively use loops in
+  R might be somewhat inefficient, mainly in terms of computing
+  time. However, my experience shows that even for simulation of high
+  volume data (> 50,000 loci, many hundreds of individuals and
+  hundreds of generations of random mating), the computations are
+  reasonably fast, even on a computer that is mediocre at best.
+  
+  And, of course, the C source code is available to everyone. So when
+  computing time is really an absolutely critical factor, one could
+  just use the underlying C function (which is used in basically the
+  same way as the calling R function), to write a customized C
+  routine.
+
+\end{description}
+
+
+
+\section{Demonstration}
+In this last part, usage of the package will be demonstrated. This is
+done by a session in which the following szenario is simulated:
+\begin{enumerate}
+\item 250 F$_{2}$ individuals from two founder lines are created
+\item this population is then random mated for 50 generations
+\item after this, the best individual is selected according to its
+  phenotype ($h^{2} = 0.5$)
+\item a DH population is then generated from this selected individual
+\item this DH population is the training population for some genomic
+  selection algorithm, hence the final step is to generate the
+  phenotypes and a design matrix
+\end{enumerate}
+The simulated genome is defined as follows:
+\begin{itemize}
+\item two chromosomes, of length $1 M$ each
+\item 100 loci per chromosome, of these, five are QTL (three with purely
+  additive effect, two with dominance effect as well). One of the QTL
+  on a chromosome is a perfect (observed) marker. Hence there are 96
+  markers per chromosome.
+\end{itemize}
+
+The simulated data is not quite ``high density'', the package can do
+allot more than 200 loci/marker. However, this is supposed to be an
+introduction and demonstration, so I want to keep the amount of data
+that is created low. The interested user can easily run the example
+with, say, 5000 loci, without experiencing a serious hike in
+computing time and RAM requirement.
+
+
+\subsection{Genome definition}
+
+<<setOps,echo = FALSE, results = hide>>=
+op <- options(); utils::str(op) 
+options(SweaveSyntax="SweaveSyntaxNoweb")
+options(continue=" ")
+options(prompt = "R> ")
+@
+
+After loading the package, 
+<<load>>=
+library(hypred)
+@ 
+the first step in a simulation will usually be the definition of the
+the genome parameters and the creation of the \texttt{hypredGenome}
+object. This is done with the function
+\texttt{hypredGenome}\footnote{Notice that all function, that are
+  intended to be called by the user, are prefixed with
+  ``\texttt{hypred}'' to avoid naming clashes with other
+  packages. Notice further that the argument names usually follow the
+  pattern: \texttt{aspect-of-thing-of-interesst} then
+  \texttt{thing-of-interesst}. Whenever reasonable, the arguments are
+  in small case, only the first three letters of the word are used,
+  words are separated by a dot and articles and prepositions are not
+  used. So for example, the argument for the ``number of chromosomes''
+  is \texttt{num.chr}.}. The argument \texttt{num.chr} gives the
+number of chromosomes, \texttt{len.chr}, their lengths in Morgan and
+\texttt{num.snp} the number of SNP loci \emph{per chromosome}.
+<<define.genome>>=
+genome <- hypredGenome(num.chr = 2, 
+                       len.chr = c(1.0, 1.0), 
+                       num.snp = 100)
+@
+This creates an object of class \texttt{hypredGenome} which serves
+as a storage container for all the information about the genome that
+is needed by the other functions. Please refer to the help page of the
+object for details on its expected content. There are methods for the
+functions \texttt{summary} and \texttt{show} that will both print the
+same short information about the genome (\texttt{summary} also
+invisibly returns a list with the displayed parameters).
+<<summary>>=
+summary(genome)
+@ 
+
+The function \texttt{hypredGenome} by default simulates a genetic map
+of the loci on the chromosome, where the positions of the loci are
+uniformly distributed.
+<<show.random.map>>=
+slot(genome, "pos.snp")[1:5] ## pos. of first 5 
+@
+This map can be modified with the function \texttt{hypredNewMap}
+which takes only one argument appart from the object\footnote{The
+  \texttt{hypredGenome} object is usually the first argument in every
+  function}. This argument is \texttt{new.map} and takes a numeric
+vector that gives the map position of all the loci. In this case there
+are 100 loci per chromosome, so there need to be 200 elements in the
+vector. The elements \texttt{[1:100]} give the positions of the loci
+on chromosome 1, elements \texttt{[101:200]} the positions of the loci
+on chromosome 2. On the new map, the loci are arranged evenly and in
+equal distance.
+<<new.map>>=
+map <- rep(seq(0, 0.99, by = 0.01 ), 2)
+genome <- hypredNewMap(genome, 
+                       new.map = map)
+                       
+@ 
+<<orderly.map>>=
+slot(genome, "pos.snp")[1:5] ## pos. of first 5 
+@
+There is a convenience function, called \texttt{hypredSNPdist}, that
+returns the genetic distance (\texttt{d}) and the expected
+recombination frequency (\texttt{r}) between two loci on a
+chromosome. The arguments are self explaining.
+<<snp.dist>>=
+hypredSNPdist(genome, 
+              chromosome = 1, 
+              SNP1 = 1, 
+              SNP2 = 3)              
+@ 
+
+Until now, there are no QTL assigned and all loci are
+markers. Assignment of QTL is done with the function
+\texttt{hypredNewQTL}. Apart from the object, there are five
+additional arguments to it. Arguments \texttt{new.id.add},
+\texttt{new.id.dom} and \texttt{new.id.per.mar} give the IDs of the
+loci which are assigned QTL with additive effects, QTL with dominance
+effects and perfect markers. Since all QTL must have an additive
+effect, \texttt{new.id.add} actually gives the IDs of all QTL and
+\texttt{new.id.dom} must be a subset of it.  The ID of a loci is its
+index in the vector of all loci in the object. If, as in this example,
+the object holds 200 loci, then the ID of the locus with lowest map
+postion of chromosome 1 is 1, the next has ID 2 and so on. The ID of
+the locus with lowest map position of chromosome 2 is 101. Note that
+the number of QTL, QTL with dominance effect and the number of perfect
+markers must be the same on each chromosome.
+
+The five QTL per chromosome will be assigned to the 1st, 20th, 40th,
+60th and 80th locus on each chromosome.
+<<qtl.vect>>=
+qtl.ids <- c(1, 20, 40, 60, 80,  ## chr. 1
+             101, 120, 140, 160, 180)  ## chr. 2
+@ 
+The third of these is the one that has a dominance effect as well.
+<<qtl.vect2>>=
+qtl.dom.ids <- c(40,  ## chr. 1
+                 140)  ## chr. 2
+@ 
+The second will be the perfect marker
+<<qtl.vect3>>=
+per.mar.ids <- c(20,  ## chr. 1
+                 120)  ## chr. 2
+@ 
+The remaining two arguments to \texttt{hypredNewQTL} are
+\texttt{new.eff.add} and \texttt{new.eff.dom}. They give the additive
+and dominance effects. These are assigned to the QTL according to the
+corresponding element in the vectors given to \texttt{new.id.add}
+respectively \texttt{new.id.dom}. So the second additive effect in the
+vector given to \texttt{new.eff.add} would be assigned to the QTL with
+ID 20. For simplicity, the additive effects are  1 and the dominance effects are 0.5.
+
+<<qtl>>=
+genome <- hypredNewQTL(genome, 
+                       new.id.add = qtl.ids, 
+                       new.id.dom = qtl.dom.ids, 
+                       new.id.per.mar = per.mar.ids, 
+                       new.eff.add =  rep(1, 10), 
+                       new.eff.dom = c(0.5, 0.5)
+                       )
+@ 
+
+After assigning QTL, the printed summary changes accordingly, and now
+includes summary statistics of the effects (not very usefull in this
+example, though).
+<<summary2>>=
+summary(genome)
+@ 
+
+The definition of the genome is thereby complete. Note that the map,
+as well as the QTL can be modified later on at any point.
+
+\subsection{F$_2$ base population}
+The gametes of two founder lines that differ at each locus can be
+created by the function \texttt{hypredFounder}. The only additional
+argument to it is \texttt{prob.snp} which gives the probability that
+founder line 1 has the \textbf{1} allele at any locus. For simplicity,
+this is set to 1, so that line 1 has all the \textbf{1} alleles and
+line 2 all the \textbf{0} alleles. The output is a two row matrix,
+with the gamete of line 1 in row 1 and the gamete of line 2 in row
+2. Because the lines are assumed to be absolutely homozygous, each can
+have only one distinct gamete.
+
+<<founder>>=
+founder1 <- hypredFounder(genome, 
+                          prob.snp = 1)[1, ]
+founder2 <- hypredFounder(genome, 
+                         prob.snp = 1)[2, ]
+@                               
+As mentioned in the beginning, genotypes are stored as one row matrices:
+<<gen.founder>>=
+founder1[1:5] ## first 5 loci
+founder2[1:5] ## first 5 loci
+@ 
+These matrices could have been created directly,
+\texttt{hypredFounder} is just a convenience function.
+
+To recombine these parental genomes, the workhorse function
+\texttt{hypredRecombine} is used. This is the central function of the
+package, see its help page, as well as the descriptions in section
+\ref{sec:basic-conc-poss} for details.  The \textit{two haploid
+  parental chromosome sets in a sex cell} that are to be recombined, 
+are given as one row matrices via the arguments \texttt{genomeA} and
+\texttt{genomeB}. Which set is given to which doesn't matter. Because
+the two founder lines are homozygous, it follows that this is the sex
+cell of a F$_{1}$ individual.
+
+The mutation rate for both SNP marker and QTL is set to $2.5 \cdot
+10^{-5}$, haplotype blocks are not used.
+<<intro.hypred>>=
+set.seed(114)## to see a recomb. event
+new.gamete <- hypredRecombine(genome, 
+                              genomeA = founder1, 
+                              genomeB = founder2, 
+                              mutate = TRUE, 
+                              mutation.rate.snp = 2.5 * 10^-5, 
+                              mutation.rate.qtl = 2.5 * 10^-5, 
+                              block = FALSE)
+@ 
+The output is again a one row matrix with the recombined gamete.
+<<show.gam>>=
+new.gamete[1:20] ## first 20 loci
+@ 
+To create a F$_{2}$ population with size $N = 250$, 500 such gametes
+have to be produced. This is best done in a loop.
+For this a matrix is pre-allocated that has as many rows as gametes
+and as many columns as loci.
+<<pre.all.mat.F2>>=
+N <- 250 ## number of individuals
+F2 <- matrix(nrow = N * 2, 
+             ncol = 200)
+@ 
+Then \texttt{hypredRecombine} is called within the loop and the
+gametes are assigned to subsequent rows. 
+<<f2>>=
+for(i in 1:(N*2))
+  {
+    F2[i, ] <- hypredRecombine(genome, 
+                               genomeA = founder1, 
+                               genomeB = founder2, 
+                               mutate = TRUE, 
+                               mutation.rate.snp = 2.5 * 10^-5, 
+                               mutation.rate.qtl = 2.5 * 10^-5, 
+                               block = FALSE)
+  }
+@ 
+The rows 1 and 2 represent the two chromosome sets of $F_{2}$ individual 1,
+the rows 3 and 4 represent the two chromosome sets of $F_{2}$ individual 2 and
+so on.
+
+
+\subsection{Random mating}
+Random mating is done according to the following algorithm:
+\begin{enumerate}
+\item create two matrices with dimension $[2N, l]$ ($l$ is the
+  no. loci) and call them \texttt{random.mate.pop} and
+  \texttt{random.mate.pop.temp}
+\item \label{item:1} store the genotypes of all the individuals in
+  \texttt{random.mate.pop}
+\item \label{item:2}create two recombined gametes from each individual
+  in \texttt{random.mate.pop} and store them in
+  \texttt{random.mate.pop.temp} at the same position as the parental
+  chromosome sets in \texttt{random.mate.pop}
+\item \label{item:3} randomly permutate the rows of
+  \texttt{random.mate.pop.temp}, thats one generation of random mating
+\item repeat \ref{item:1} to \ref{item:3} for a particular number of
+  generations
+\end{enumerate}
+
+This algorithm is implemented below with two nested loops (outer for
+generations, inner for individuals).
+<<random.mate.var>>=
+G <- 50 ## number of generations
+
+random.mate.pop <- F2 ## identical to the F2 at start
+random.mate.pop.temp <- matrix(nrow = N*2, ncol = 200)
+@ 
+
+<<random.mate>>=
+
+for(generation in 1 : G) ## loop over generations
+  {
+    gameteIndex1 <- 1 ## indexing variables
+    gameteIndex2 <- 2
+    for(indiv in 1 : N) ## loop over individuals
+      {
+        ## gamete 1
+        random.mate.pop.temp[gameteIndex1,] <-         
+          hypredRecombine(genome,
+                          genomeA = random.mate.pop[gameteIndex1,],
+                          genomeB = random.mate.pop[gameteIndex2,],
+                          mutate = TRUE,
+                          mutation.rate.snp = 2.5 * 10^(-5),
+                          mutation.rate.qtl = 2.5 * 10^(-5),
+                          block = FALSE)
+        ## gamete 2
+        random.mate.pop.temp[gameteIndex2,] <-         
+          hypredRecombine(genome,
+                          genomeA = random.mate.pop[gameteIndex1,],
+                          genomeB = random.mate.pop[gameteIndex2,],
+                          mutate = TRUE,
+                          mutation.rate.snp = 2.5 * 10^(-5),
+                          mutation.rate.qtl = 2.5 * 10^(-5),
+                          block = FALSE)
+
+        ## increment to next individual
+        gameteIndex1 <- gameteIndex1 + 2 
+        gameteIndex2 <- gameteIndex2 + 2
+      } ## end for N
+    
+    ## permutate
+    random.mate.pop <- random.mate.pop.temp[sample(1 : (N * 2)), ]
+  } ## end for G
+@ 
+
+The matrix \texttt{random.mate.pop} now contains the random mated
+population. 
+\subsection{Selection}
+The genotypic values of the individuals can be obtained by the
+function \texttt{hypredTruePerformance}. This function takes two
+further arguments: \texttt{genotypes}, to which the matrix that
+stores the genotypes is given and \texttt{DH} which is \texttt{TRUE}
+or \texttt{FALSE}, depending on whether the matrix contains DH
+individuals or not. This argument needs to be set to \texttt{FALSE} in
+this case, the implications of \texttt{DH = TRUE} will be discussed
+later on.
+<<g.value>>=
+g.value <- hypredTruePerformance(genome, 
+                                 random.mate.pop, 
+                                 DH = FALSE)
+summary(g.value)
+@ 
+
+<<varAndmean,echo = FALSE, results = hide>>=
+
+##-------------------------
+## compute expected variance and mean
+
+## additive
+
+## purely additive loci
+p.add <- (colSums(random.mate.pop)/nrow(random.mate.pop))[qtl.ids[!qtl.ids%in%qtl.dom.ids]]
+q.add <- 1 - p.add
+
+var.add <- sum((2*p.add*q.add*1^2))
+mean.add <- sum(2*p.add*1)
+
+## additive + dominance loci
+p.add.dom <-  (colSums(random.mate.pop)/nrow(random.mate.pop))[qtl.dom.ids]
+q.add.dom <-  1 - (colSums(random.mate.pop)/nrow(random.mate.pop))[qtl.dom.ids]
+
+var.add.dom <- sum(2 * p.add.dom * q.add.dom * ((1 + 0.5*(q.add.dom - p.add.dom))^2))
+mean.add.dom <- sum(2*p.add.dom*(1 + (1 - p.add.dom ) * 0.5))
+
+## dominance variance
+var.dom <- sum((2 * p.add.dom * q.add.dom * 0.5)^2)
+
+## expectations
+
+meanExp <- mean.add + mean.add.dom
+varExp <- var.add + var.add.dom + var.dom
+@
+
+Note that the expected value (assuming that all QTL are in linkage
+equilibrium (LE), $p$ denoting the frequency of the \textbf{1}
+allele and $q$ the frequency of the \textbf{0} allele) would be
+\Sexpr{round(meanExp, 3)} \cite{Falconer}
+\begin{equation}
+  \sum_{l} 2p(a + dq) \notag
+\end{equation}
+which is in good agreement with the observed mean of
+\Sexpr{mean(g.value)}\footnote{The computations for the expectations
+  are included into the .Rnw file, but are not echoed. They are of
+  course available in the source.}.
+
+The observed variance of the genotypic values is
+\Sexpr{round(var(g.value),3)}, which is as well in good
+agreement\footnote{The good agreement between observed and expected
+  values implies that 50 generations of random mating were enough to
+  dissipate the coupling phase linkage and bring the QTL into LE.}
+with the expectation under perfect LE, which would be
+\Sexpr{round(varExp,3)} \cite{Falconer}.
+\begin{equation}
+  \sum_{l} 2pq\big( a + d(q - p)\big)^2 + (2pq)^2 \notag
+\end{equation} 
+In order to obtain $h^{2} \approx 0.5$, a normaly distributed random
+variable, with mean 0 and the same variance is added to arrive at the
+phenotypic values.
+<<pheno>>=
+var.env <- var(g.value)
+phen.value <- g.value + rnorm(250, 0,  sqrt(var.env))
+@
+Individual number \Sexpr{which(phen.value == max(phen.value))} has
+the highest phenotypic value and thus is selected.  The two rows
+(chromosome sets) in \texttt{random.mate.pop} that correspond to it
+are \Sexpr{which(phen.value == max(phen.value))*2 - 1} and
+\Sexpr{which(phen.value == max(phen.value))*2}. A new matrix (called
+\texttt{selected}) is created that stores only the genotype of this
+individual.
+<<select>>=
+index.individual <- which(phen.value == max(phen.value)) 
+index.row1 <- index.individual * 2 - 1
+index.row2 <- index.individual * 2 
+selected <- random.mate.pop[c(index.row1, index.row2), ]
+@ 
+
+\subsection{DH population}
+The DH population is produced similarily to the F$_{2}$, just that
+only 1 gamete is produced per individual.
+
+<<pre.all.mat.DH>>=
+DH <- matrix(nrow = N, 
+             ncol = 200)
+@ 
+
+<<DH>>=
+for(i in 1:N)
+  {
+    DH[i, ] <- hypredRecombine(genome, 
+                               genomeA = selected[1, ], 
+                               genomeB = selected[2, ], 
+                               mutate = TRUE, 
+                               mutation.rate.snp = 2.5 * 10^-5, 
+                               mutation.rate.qtl = 2.5 * 10^-5, 
+                               block = FALSE)
+  }
+@ 
+Note that it is not necessary to explicitely double the gametes. The
+function \texttt{hypredTruePerformance}, as well as the function
+\texttt{hypredCode}, which creates design matrices, both have an
+argument named \texttt{DH}. Setting this argument to \texttt{TRUE},
+makes the function assume that the matrix given to the argument
+\texttt{genotypes} holds DH individuals with one row representing one
+individual. This feature should be used as much as possible, because
+the matrix then needs to be only half as big, which in turn saves memory!
+<<precalc.mean.DH, echo = FALSE, results = hide>>=
+mean.DH <- mean(hypredTruePerformance(genome, 
+                                      DH, 
+                                      DH = TRUE))
+@ 
+The mean genotypic value of the DH population is \Sexpr{print(round(mean.DH, 3))}.
+The genotypic value of the of the individual from which the DH
+population was derived was \Sexpr{g.value[index.individual]}.
+This can easily be verified by looking at its QTL-genotype
+<<QTL.geno>>=
+selected[, qtl.ids] ## all QTL
+selected[, qtl.dom.ids] ## QTL with dominance
+
+## effect a = 1 times the number of 1 alleles
+sum(selected[, qtl.ids] == 1) +
+  ## 0.5 if the dominance QTL have genotype 01 or 10 (hence sum = 1)
+  (sum(selected[, qtl.dom.ids[1]]) == 1)*0.5 +
+  (sum(selected[, qtl.dom.ids[2]]) == 1)*0.5 
+@ 
+
+It follows also that the expected mean of the DH population
+(assuming QTL in LE) must be \Sexpr{sum(selected[, qtl.ids] == 1)},
+which is in good agreement with the observed value.
+
+Phenotypic values of the DH population are generated in the same way
+as for the random mating population. Note that the same environmental
+variance is used, so the heritability will be different.
+
+<<pheno.DH>>=
+g.value.DH <- hypredTruePerformance(genome, 
+                                    DH, 
+                                    DH = TRUE)
+
+phen.value.DH <- g.value.DH + rnorm(250, 0,  sqrt(var.env))
+@
+
+The last demonstrated step is the creation of a design matrix. This is
+done by the function \texttt{hypredCode}. Its additional arguments
+are: \texttt{genotypes}, \texttt{DH} and \texttt{type}. The first two
+have the same meaning as for \texttt{hypredTruePerformance}. The
+argument \texttt{type} takes a character string that gives the type of
+design matrix to be created. Currently four different types can be
+created, see \texttt{?hypredCode} for details. The one used in this
+example is \texttt{type = "012"} which means that element $X_{ij}$
+($i$ indexing the individual, $j$ the locus) will be 0 if the locus is
+\textbf{0-0}, 1 if the locus is \textbf{1-0} or \textbf{0-1} and 2 if
+the locus is \textbf{1-1}, i.e. coded is the number of \textbf{1}
+alleles at a locus. This type of design matrix is suitable to estimate
+substitution effects.
+
+<<desg>>=
+design.DH <- hypredCode(genome, 
+                        genotypes = DH, 
+                        DH = TRUE, 
+                        type = "012")
+@ 
+
+Note that QTL loci that are not designated as perfect markers, are not
+included in the design matrices. For example, locus 1 was a QTL, but
+not a perfect marker, hence it is removed (the first row of the output
+are the column names of the matrix, which correspond to the loci IDs):
+<<not.per.mar>>=
+design.DH[1, 1:5]
+@ 
+The QTL assigned to locus 20, was a perfect marker and hence is
+included:
+<<per.mar>>=
+design.DH[1, 17:21]
+@ 
+
+With the phenotypes, genotypic values and the design matrix available,
+one can proceed with the actual analysis of this data or with
+deploying some genomic selection/prediction method. However, this is
+out of the scope of this vignette and package.
+
+
+\begin{thebibliography}{8} 
+\bibitem[a]{meuwissen}Meuwissen, T. H. E., B. J. Hayes, and
+  M. E. Goddard: Prediction of Total Genetic Value Using
+    Genome-Wide Dense Marker Maps. {\sl Genetics 157}(4), 1819-1829.
+
+\bibitem[b]{Falconer}D. S. Falconer:
+  {\sl Introduction to Quantitative Genetics}. Oliver and Boyd.,
+  London, 1967.
+\bibitem[c]{wu}Wu, R., M. Chang-Xing, G. Casella: {\sl Statistical Genetics
+  of Quantitative Traits}. Springer, New York, 2007.
+\end{thebibliography}
+  
+
+
+\end{document}
