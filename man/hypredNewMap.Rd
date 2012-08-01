@@ -4,7 +4,7 @@
 \alias{hypredNewMap,hypredGenome-method}
 
 \title{
-Modify the map of a \code{"\linkS4class{hypredGenome}"} object
+Modify the map of a hypredGenome object
 }
 
 \description{

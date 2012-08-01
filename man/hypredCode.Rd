@@ -116,7 +116,7 @@ hypredCode(object, \dots)
   Frank Technow
 }
 
-\note{The function call the C routine \code{hypredCode_FUN_dom} to code
+\note{The function calls the C routine \code{hypredCode_FUN_dom} to code
   the "Xu2003" type matrix.}
 
 \seealso{ The function \code{\link{hypredRecombine}} which is used to

@@ -19,8 +19,8 @@ hypred: Simulation of genomic data in applied genetics
 \tabular{ll}{
 Package: \tab hypred\cr
 Type: \tab Package\cr
-Version: \tab 0.1\cr
-Date: \tab 2011-02-02\cr
+Version: \tab 0.2\cr
+Date: \tab 2012-08-01\cr
 License: \tab GNU General Public License Version 2, June 1991\cr
 LazyLoad: \tab yes\cr
 Depends: \tab methods\cr

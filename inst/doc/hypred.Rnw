@@ -22,7 +22,7 @@
 \title{R Package hypred: Simulation of Genomic Data in Applied Genetics}
 \author{Frank Technow\footnote{University of Hohenheim, Institute of
     Plant Breeding, Seed Science and Population Genetics, Stuttgart, Germany}}
-\date{package version 0.1}
+\date{package version 0.2}
 \maketitle 
 
 \section{Introduction}
@@ -578,7 +578,7 @@ agreement\footnote{The good agreement between observed and expected
 with the expectation under perfect LE, which would be
 \Sexpr{round(varExp,3)} \cite{Falconer}.
 \begin{equation}
-  \sum_{l} 2pq\big( a + d(q - p)\big)^2 + (2pq)^2 \notag
+  \sum_{l} 2pq\big( a + d(q - p)\big)^2 + (2pqd)^2 \notag
 \end{equation} 
 In order to obtain $h^{2} \approx 0.5$, a normaly distributed random
 variable, with mean 0 and the same variance is added to arrive at the

@@ -6,7 +6,7 @@
 \alias{hypredNewQTL,hypredGenome-method}
 
 \title{
-Assign new QTLs to a \code{"\linkS4class{hypredGenome}"} object
+Assign new QTLs to a hypredGenome object
 }
 
 \description{ A generic function to assign new QTLs to a
