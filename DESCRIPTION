@@ -1,18 +1,16 @@
 Package: hypred
 Type: Package
 Title: Simulation of genomic data in applied genetics
-Version: 0.2
-Date: 2012-08-01
+Version: 0.4
+Date: 2013-11-20
 Author: Frank Technow
 Maintainer: Frank Technow <Frank.Technow@uni-hohenheim.de>
 Description: The package is intended for simulating high density
-        genomic data. Its focus is on genomic applications in applied
-        genetics,namely hybrid breeding, but it should be useful in
-        related fields as well.  The meiosis is simulated under a
-        count-location model, the genetic structure can include
-        additive and dominance effects. The low level nature of the
-        package provides great flexibility in creating all kinds of
-        populations.
+             genomic data. The meiosis is
+             simulated under a count-location model, the genetic
+             structure can include additive and dominance effects. The
+             low level nature of the package provides great
+             flexibility in creating all kinds of populations.
 License: GPL (>= 2)
 LazyLoad: yes
 Depends: R (>= 2.11.1), methods
@@ -25,6 +23,7 @@ Collate: hypredGenome-class.R codeW.genomeSpecific.R hypredCode.R
         hypredTpGenomeSpecificMethods.R hypredTruePerformanceMethods.R
         showMethods.R summaryMethods.R hypredNewMapMethods.R
         hypredNewQTLMethods.R
-Packaged: 2012-08-01 08:27:09 UTC; frank
+Packaged: 2013-11-20 11:49:37 UTC; frank
+NeedsCompilation: yes
 Repository: CRAN
-Date/Publication: 2012-08-01 09:28:18
+Date/Publication: 2013-11-20 13:39:08

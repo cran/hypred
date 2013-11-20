@@ -5,8 +5,8 @@
  * Author: Frank Technow
  * Maintainer: Frank Technow
  * Created: Fr Sep 17 13:24:30 2010 (+0200)
- * Version: 0.2
- * Last-Updated: Mo Nov 22 10:59:09 2010 (+0100)
+ * Version: 0.4
+ * Last-Updated: Mo Nov 20 10:59:09 2013 (+0100)
  *           By: Technow
  *     Update #: 19
  * URL: 
@@ -26,6 +26,12 @@
 
 /* Change Log:
  * 
+ *  V0.3 - array lCx was initiated with zero length in some
+ *  cases. This is fixed, the minimum length is now one.
+ *
+ *  V0.4 - (*(SNPaftCx + numNextCx - 1) > *numLoci) was evaluated even
+ *  if numNextCx was larger than nCx, fixed now
+ *
  */
 
 /* This program is free software; you can redistribute it and/or
@@ -218,11 +224,22 @@ void meiosisFUNallChr (int *homologe1,	            /* one parental homologe
 
   
       /* sample the locations of the Cx (and sort them) */
-
-      double lCx[nCx];	        /* locations of Cx */
+      
+      int position_dummy;
+      if(nCx > 0)
+	position_dummy = 0;
+      else
+	position_dummy = 1;
+      
+      // vector of Cx positions (positition_dummy=1 is added so that
+      // the array has length > 0 even if nCx == 0 (the element in the
+      // last position is ignored)
+      double lCx[nCx + position_dummy];     
+      	
 
       if(nCx > 0)
 	{
+
 	  int countCx;
 	  for(countCx = 0; countCx < nCx; ++countCx)
 	    {
@@ -263,8 +280,8 @@ void meiosisFUNallChr (int *homologe1,	            /* one parental homologe
       if(nCx > 0)			/* only if there were Cx */
 	{
   
-	  int SNPaftCx[nCx];		/* stores the numbers of the SNP
-					   right after a Cx */
+	  int SNPaftCx[nCx];		/* stores the index of the SNP
+					   right after the Cx */
 
   
 	  double locNextCx;    /* the location of the next Cx */
@@ -382,7 +399,7 @@ void meiosisFUNallChr (int *homologe1,	            /* one parental homologe
 	      /* the last existing SNP) then ignore the Cx and copy until */
 	      /* the end of the chromosome as well */
         
-	      if((numNextCx > nCx) | (*(SNPaftCx + numNextCx - 1) > *numLoci) )
+	      if((numNextCx > nCx) || (*(SNPaftCx + numNextCx - 1) > *numLoci))
 		{
 		  while(countSNP <= (*numLoci - 1)  )
 		    {

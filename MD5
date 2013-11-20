@@ -1,4 +1,4 @@
-ff5762cc0e603bf4a53b9bd88c9ec3d7 *DESCRIPTION
+71dc28767af6c248979db4b8184d815f *DESCRIPTION
 20850db63b31d0c5fb54868ba333fca3 *NAMESPACE
 2e1ba303bc6c978592f815114ab551a9 *R/codeW.genomeSpecific.R
 ae7bd9a6c0cb46cd67299e49fd1d06a7 *R/hypredCode.R
@@ -22,11 +22,13 @@ a561b7f28173f2b36c64fb0fec0af370 *R/hypredTruePerformance.R
 7c2170754804fa4cf51ce0e0f5072283 *R/hypredTruePerformanceMethods.R
 4ad2b7c554e3ae3a5a6c1215122c67e8 *R/showMethods.R
 611026e797b375af83d579a35a1af9f6 *R/summaryMethods.R
+3aa4cc9b7c7782dc3bdca03cfdd4a91e *build/vignette.rds
 d046d1d88ff042d4d3d0799f425841cc *inst/CITATION
-138c0968f72f24f8dbcfee91cee1fbd0 *inst/doc/hypred.Rnw
-4ae9c433df187e650f3d79f10e0babba *inst/doc/hypred.pdf
+bef1d72dc7dfd93754605463d074ab10 *inst/doc/hypred.R
+0396eded83e60c341a76f6f7b7f5fab2 *inst/doc/hypred.Rnw
+e78f85d7e40f587e1868cf64fa676422 *inst/doc/hypred.pdf
 e5789a416252990e47c7eb555644bf47 *man/codeW.genomeSpecific.Rd
-f40518f88b0d31b0e7ca17927a64a345 *man/hypred-package.Rd
+8c87344cba706682a4e530fefbca5e6f *man/hypred-package.Rd
 2fa37a195289588fb1c0f3a293b378ad *man/hypredCode.Rd
 f40312e067a578b6cfe3cb9ccac848e8 *man/hypredDInv.Rd
 420ce6b4db5bbf886e96a0e319a6221b *man/hypredFounder.Rd
@@ -40,4 +42,5 @@ b8f6bb2869ab5109654cda2b3004932f *man/hypredSNPdist.Rd
 31c1e0b91aba45dbaa9ce432c1560469 *man/hypredTruePerformance.Rd
 33106e12d468f22c295ec451296006c0 *man/show-methods.Rd
 d5c96c357022d0894b01a8da6e197ddd *man/summary-methods.Rd
-4823b86b903dbf0bbd58d163755d8823 *src/hypredRoutines.c
+2b63b6dabd198ec6fd5c6ccda037beb7 *src/hypredRoutines.c
+0396eded83e60c341a76f6f7b7f5fab2 *vignettes/hypred.Rnw

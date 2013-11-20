@@ -7,20 +7,17 @@ hypred: Simulation of genomic data in applied genetics
 }
 
 \description{ The package \pkg{hypred} is intended for simulating high
-  density genomic data. Its focus is on genomic applications in applied
-  genetics, namely genomic prediction and selection in hybrid maize
-  breeding, but it should be useful in related fields as well.  The
-  meiosis is simulated under a count-location model, the genetic
-  structure can include additive and dominance effects. The low level
-  nature of the package provides great flexibility in creating all kinds
-  of populations.  }
+  density genomic data. The meiosis is simulated under a count-location
+  model, the genetic structure can include additive and dominance
+  effects. The low level nature of the package provides great
+  flexibility in creating all kinds of populations.  }
 
 \details{
 \tabular{ll}{
 Package: \tab hypred\cr
 Type: \tab Package\cr
-Version: \tab 0.2\cr
-Date: \tab 2012-08-01\cr
+Version: \tab 0.4\cr
+Date: \tab 2013-11-20\cr
 License: \tab GNU General Public License Version 2, June 1991\cr
 LazyLoad: \tab yes\cr
 Depends: \tab methods\cr
