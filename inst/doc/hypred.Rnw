@@ -20,9 +20,8 @@
 
 \begin{document}
 \title{R Package hypred: Simulation of Genomic Data in Applied Genetics}
-\author{Frank Technow\footnote{University of Hohenheim, Institute of
-    Plant Breeding, Seed Science and Population Genetics, Stuttgart, Germany}}
-\date{package version 0.4}
+\author{Frank Technow}
+\date{package version 0.5}
 \maketitle 
 
 \section{Introduction}

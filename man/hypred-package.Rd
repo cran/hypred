@@ -3,7 +3,7 @@
 \alias{hypred}
 \docType{package}
 \title{
-hypred: Simulation of genomic data in applied genetics
+hypred: Simulation of Genomic Data in Applied Genetics
 }
 
 \description{ The package \pkg{hypred} is intended for simulating high
@@ -16,8 +16,8 @@ hypred: Simulation of genomic data in applied genetics
 \tabular{ll}{
 Package: \tab hypred\cr
 Type: \tab Package\cr
-Version: \tab 0.4\cr
-Date: \tab 2013-11-20\cr
+Version: \tab 0.5\cr
+Date: \tab 2014-12-20\cr
 License: \tab GNU General Public License Version 2, June 1991\cr
 LazyLoad: \tab yes\cr
 Depends: \tab methods\cr
@@ -46,10 +46,7 @@ with methods defined for the \code{hypredGenome} object.}
 
 \author{Frank Technow
 
-  at University of Hohenheim, Institute of Plant Breeding, Seed Science
-  and Population Genetics, Stuttgart, Germany 
-
-  Maintainer: Frank Technow \email{ Frank.Technow@uni-hohenheim.de }
+  Maintainer: Frank Technow \email{ Frank.Technow@gmx.net }
 }
 
 \keyword{ package }
